@@ -19,8 +19,8 @@ async def root():
 
 
 @app.post("/notification")
-async def test(settings: Annotated[config.Settings, Depends(get_settings)], payload: Payload):
-    res = await novu.Novu(settings.novu_apikey).trigger(
+async def notification(settings: Annotated[config.Settings, Depends(get_settings)], payload: Payload):
+    res = novu.Novu(settings.novu_apikey).trigger(
         "timesheet",
         "c761c317-2037-4315-8a1a-829523a98403",
         payload.model_dump()
