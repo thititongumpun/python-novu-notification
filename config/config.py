@@ -1,9 +1,8 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from novu.api import EventApi
 
 
 class Settings(BaseSettings):
-    app_name: str = "Awesome API"
-    admin_email: str
-    items_per_user: int = 50
+    novu_apikey: str
 
     model_config = SettingsConfigDict(env_file=".env")
