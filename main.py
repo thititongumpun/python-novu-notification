@@ -3,8 +3,9 @@ from functools import lru_cache
 from typing_extensions import Annotated
 from config import config
 from typing import Optional
-from model.payload import Payload
+from model.payload import Notification, Payload
 from service import novu
+
 
 app = FastAPI()
 
@@ -19,9 +20,9 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.post("/notification")
+@app.post("/notification", response_model=Notification)
 async def notification(settings: Annotated[config.Settings, Depends(get_settings)], payload: Payload, x_api_key: Optional[str] = Header(None)):
-    if (settings.x_api_key != x_api_key):
+    if settings.x_api_key != x_api_key:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="no authorized",
@@ -32,4 +33,4 @@ async def notification(settings: Annotated[config.Settings, Depends(get_settings
         payload.model_dump()
     )
 
-    return res
+    return {"acknowledged": res.acknowledged, "status": res.status}
