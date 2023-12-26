@@ -21,6 +21,9 @@ jobs:
         run: pip install tox
       - name: Run tox
         run: tox -e py
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          NOVU_APIKEY: ${{ secrets.NOVU_APIKEY }}
       - uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
