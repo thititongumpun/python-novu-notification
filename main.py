@@ -12,11 +12,6 @@ from utils.get_apikey import ApiKey
 app = FastAPI()
 
 
-@lru_cache
-def get_settings():
-    return config.Settings()
-
-
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
@@ -24,7 +19,6 @@ async def root():
 
 @app.post("/notification", response_model=Notification)
 async def notification(payload: Payload, x_api_key: Optional[str] = Header(None)):
-    # auth_api_key = get_x_api_key()
     auth_api_key = ApiKey().x_api_key
     if auth_api_key != x_api_key:
         raise HTTPException(

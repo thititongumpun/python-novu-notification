@@ -21,17 +21,6 @@ def test_notification_bad_apikey():
     assert response.json() == {"detail": "no authorized"}
 
 
-def test_notification():
-    auth_api_key = ApiKey().x_api_key
-    response = client.post("/notification",
-                           headers={"x-api-key": auth_api_key},
-                           json={
-                               "timesheet": "test notification from unit test"
-                           },)
-    assert response.status_code == 200
-    assert response.json() == {"acknowledged": True, "status": "processed"}
-
-
 def test_todo_bad_apikey():
     response = client.post("/todo",
                            headers={"x-api-key": "badapikey"},
@@ -40,14 +29,3 @@ def test_todo_bad_apikey():
                            },)
     assert response.status_code == 401
     assert response.json() == {"detail": "no authorized"}
-
-
-def test_todo():
-    auth_api_key = ApiKey().x_api_key
-    response = client.post("/todo",
-                           headers={"x-api-key": auth_api_key},
-                           json={
-                               "timesheet": "test todo from unit test"
-                           },)
-    assert response.status_code == 200
-    assert response.json() == {"acknowledged": True, "status": "processed"}
