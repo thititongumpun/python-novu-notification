@@ -50,12 +50,13 @@ def todo(settings: Annotated[config.Settings, Depends(get_settings)], x_api_key:
         settings.supabase_url, settings.supabase_key).select("timesheets", "*")
     result = [res for res in response.data if parser.parse(
         res['date_memo']).date() == today]
-    if (result is None or len(result) == 0):
+    if (result == None or len(result) == 0):
         res = novu.Novu(settings.novu_apikey).trigger(
             "timesheet",
             "c761c317-2037-4315-8a1a-829523a98403",
             {"timesheet":
                 f'Please check your timesheet {datetime.now(tz=tz).date()}'}
         )
+        print(res)
 
-    return {"message": "done"}
+    return {"acknowledged": True, "status": "processed"}

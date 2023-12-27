@@ -18,3 +18,13 @@ def test_notification_bad_apikey():
                            },)
     assert response.status_code == 401
     assert response.json() == {"detail": "no authorized"}
+
+
+def test_todo_bad_apikey():
+    response = client.post("/todo",
+                           headers={"x-api-key": "badapikey"},
+                           json={
+                               "timesheet": "Clean DB"
+                           },)
+    assert response.status_code == 401
+    assert response.json() == {"detail": "no authorized"}
