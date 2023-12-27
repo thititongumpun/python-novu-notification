@@ -38,7 +38,7 @@ async def notification(settings: Annotated[config.Settings, Depends(get_settings
 
 
 @app.post('/todo', response_model=Notification)
-def test(settings: Annotated[config.Settings, Depends(get_settings)], x_api_key: Optional[str] = Header(None)):
+def todo(settings: Annotated[config.Settings, Depends(get_settings)], x_api_key: Optional[str] = Header(None)):
     if settings.x_api_key != x_api_key:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -58,4 +58,4 @@ def test(settings: Annotated[config.Settings, Depends(get_settings)], x_api_key:
                 f'Please check your timesheet {datetime.now(tz=tz).date()}'}
         )
 
-    return res
+    return {"message": "done"}
