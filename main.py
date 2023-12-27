@@ -1,12 +1,13 @@
-from fastapi import Depends, FastAPI, HTTPException, status, Header
+from fastapi import FastAPI, HTTPException, status, Header
 from functools import lru_cache
-from typing_extensions import Annotated
 from config import config
 from typing import Optional
 from model.payload import Notification, Payload
 from service import novu, supabase
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 from dateutil import parser
+from utils.get_time import get_th_timezone, get_time
+from utils.get_apikey import ApiKey
 
 app = FastAPI()
 
@@ -22,13 +23,15 @@ async def root():
 
 
 @app.post("/notification", response_model=Notification)
-async def notification(settings: Annotated[config.Settings, Depends(get_settings)], payload: Payload, x_api_key: Optional[str] = Header(None)):
-    if settings.x_api_key != x_api_key:
+async def notification(payload: Payload, x_api_key: Optional[str] = Header(None)):
+    # auth_api_key = get_x_api_key()
+    auth_api_key = ApiKey().x_api_key
+    if auth_api_key != x_api_key:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="no authorized",
         )
-    res = novu.Novu(settings.novu_apikey).trigger(
+    res = novu.Novu().trigger(
         "timesheet",
         "c761c317-2037-4315-8a1a-829523a98403",
         payload.model_dump()
@@ -38,25 +41,24 @@ async def notification(settings: Annotated[config.Settings, Depends(get_settings
 
 
 @app.post('/todo', response_model=Notification)
-def todo(settings: Annotated[config.Settings, Depends(get_settings)], x_api_key: Optional[str] = Header(None)):
-    if settings.x_api_key != x_api_key:
+def todo(x_api_key: Optional[str] = Header(None)):
+    auth_api_key = ApiKey().x_api_key
+    if auth_api_key != x_api_key:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="no authorized",
         )
-    tz = timezone(timedelta(hours=7))
-    today = datetime.now(tz=tz).date()
-    response = supabase.Supabase(
-        settings.supabase_url, settings.supabase_key).select("timesheets", "*")
+    tz = get_th_timezone()
+    today = get_time()
+    response = supabase.Supabase().select("timesheets", "*")
     result = [res for res in response.data if parser.parse(
         res['date_memo']).date() == today]
-    if (result == None or len(result) == 0):
-        res = novu.Novu(settings.novu_apikey).trigger(
+    if (len(result) == 0):
+        novu.Novu().trigger(
             "timesheet",
             "c761c317-2037-4315-8a1a-829523a98403",
             {"timesheet":
                 f'Please check your timesheet {datetime.now(tz=tz).date()}'}
         )
-        print(res)
 
     return {"acknowledged": True, "status": "processed"}

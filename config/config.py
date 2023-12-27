@@ -8,3 +8,5 @@ class Settings(BaseSettings):
     supabase_key: str
 
     model_config = SettingsConfigDict(env_file=".env")
+
+settings = Settings()
