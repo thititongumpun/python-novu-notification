@@ -37,7 +37,7 @@ async def notification(settings: Annotated[config.Settings, Depends(get_settings
     return {"acknowledged": res.acknowledged, "status": res.status}
 
 
-@app.get('/todo', response_model=Notification)
+@app.post('/todo', response_model=Notification)
 def test(settings: Annotated[config.Settings, Depends(get_settings)], x_api_key: Optional[str] = Header(None)):
     if settings.x_api_key != x_api_key:
         raise HTTPException(
