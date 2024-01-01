@@ -1,6 +1,4 @@
 from fastapi import FastAPI, HTTPException, status, Header
-from functools import lru_cache
-from config import config
 from typing import Optional
 from model.payload import Notification, Payload
 from service import novu, supabase
@@ -45,9 +43,9 @@ def todo(x_api_key: Optional[str] = Header(None)):
     tz = get_th_timezone()
     today = get_time()
     response = supabase.Supabase().select("timesheets", "*")
-    result = [res for res in response.data if parser.parse(
-        res['date_memo']).date() == today]
-    if (len(result) == 0):
+    result = [res for res in response.data if parser.parse(res['date_memo']).date(
+    ) == today]
+    if (len(result) == 0 and today.weekday() not in (5, 6)):
         novu.Novu().trigger(
             "timesheet",
             "c761c317-2037-4315-8a1a-829523a98403",
